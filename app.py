@@ -838,6 +838,11 @@ def admin_settings():
     <div class="card"><h1>Settings</h1><form method="post">{% for k in keys %}<label>{{ k }}</label><input name="{{ k }}" value="{{ get_setting(k) }}">{% endfor %}<div style="margin-top:12px"><button class="btn">Save</button></div></form></div>
     """, keys=keys)
 
+# Auto-create database on Render
+try:
+    init_db()
+except Exception as e:
+    print(f"DB init: {e}")
 if __name__ == "__main__":
     init_db()
     print("\n▶  http://127.0.0.1:5000")
