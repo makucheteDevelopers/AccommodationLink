@@ -280,6 +280,40 @@ footer{text-align:center;padding:20px 14px;margin-top:28px;background:var(--navy
 footer em{color:var(--gold);font-style:italic;letter-spacing:.3px}
 footer a{color:#d6d1c2;text-decoration:underline}footer a:hover{color:var(--gold)}
 </style></head><body>
+<!-- FORCE TERMS POPUP ON OPEN -->
+<div id="forceTerms" style="position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px">
+  <div style="background:white;max-width:520px;width:100%;max-height:85vh;overflow:auto;border-radius:16px;padding:22px">
+    <h2 style="margin:0 0 6px">Welcome to Accommodation Link 🏠</h2>
+    <p style="font-size:13px;color:#64748B;margin:0 0 12px">Please read and agree to continue</p>
+    <div style="font-size:13px;line-height:1.6;color:#334155;background:#F8FAFC;border-radius:10px;padding:14px;max-height:280px;overflow:auto">
+      <p><b>1. Listings:</b> Only list properties you own or are authorised to list. False listings will be removed and account banned.</p>
+      <p><b>2. Payments:</b> We do NOT handle rent. Pay landlord directly and ALWAYS view before paying.</p>
+      <p><b>3. Safety:</b> Never send money before viewing. Report scams via WhatsApp support.</p>
+      <p><b>4. Accuracy:</b> Price, suburb, rooms and photos must be accurate.</p>
+      <p><b>5. Contact:</b> By continuing you agree landlords / tenants may contact you via WhatsApp / phone about listings.</p>
+      <p><b>6. Liability:</b> Accommodation Link is a listing platform only and is not responsible for agreements between landlord and tenant.</p>
+    </div>
+    <label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;margin:14px 0">
+      <input type="checkbox" id="forceAgreeCheck" onchange="document.getElementById('forceAgreeBtn').disabled=!this.checked">
+      <span>I have read and agree to the Terms & Conditions</span>
+    </label>
+    <button id="forceAgreeBtn" disabled onclick="document.getElementById('forceTerms').style.display='none';document.body.style.overflow='auto';sessionStorage.setItem('al_agreed','1')" style="width:100%;background:#16A34A;color:white;border:none;padding:14px;border-radius:10px;font-weight:800;font-size:15px;cursor:pointer;opacity:0.5">I AGREE - ENTER SITE</button>
+    <p style="font-size:11px;color:#94A3B8;text-align:center;margin:10px 0 0">You must agree to use Accommodation Link</p>
+  </div>
+</div>
+<script>
+// Show on every fresh open, hide if already agreed in this session
+if(sessionStorage.getItem('al_agreed')==='1'){
+  document.getElementById('forceTerms').style.display='none';
+} else {
+  document.body.style.overflow='hidden';
+}
+// Enable button colour when checked
+document.getElementById('forceAgreeCheck').addEventListener('change', function(){
+  var btn=document.getElementById('forceAgreeBtn');
+  btn.style.opacity=this.checked?'1':'0.5';
+});
+</script>
 <header>
   <a href="/" class="logo">Accommodation&nbsp;Link</a>
   <nav>
