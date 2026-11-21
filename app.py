@@ -430,7 +430,7 @@ def listing_detail(lid):
       {% if l.lat and l.lng %}<p><b>Map:</b> <a target="_blank" href="https://www.google.com/maps?q={{ l.lat }},{{ l.lng }}">Open in Google Maps ({{ l.lat }}, {{ l.lng }})</a></p>{% endif %}
       <div class="row" style="margin-top:14px">
         <a class="btn wa" target="_blank" onclick="fetch('/listing/{{ l.id }}/track_click',{method:'POST'})" href="https://wa.me/{{ wa_number(l.contact_phone) }}?text=Hi%2C%20I%27m%20interested%20in%20{{ l.title|urlencode }}%20on%20Accommodation%20Link">💬 WhatsApp</a>
-        <button class="btn" onclick="document.getElementById('msgModal').style.display='flex'">✉️ Send message</button>
+       <a class="btn wa" target="_blank" onclick="fetch('/listing/{{ l.id }}/track_click',{method:'POST'})" href="https://wa.me/{{ wa_number(l.contact_phone) }}?text=Hi%2C%20I%20saw%20your%20house%20in%20{{ l.suburb }}%2C%20{{ l.city }}%20on%20Accommodation%20Link.%20Details%3A%20{{ l.rooms }}%20Bedroom%20{{ l.type }}%20-%20{{ l.currency }}%20{{ '%.2f'|format(l.price) }}%2Fmonth.%20Is%20it%20still%20available%3F%20Can%20I%20view%3F">💬 WhatsApp</a>
         <a class="btn call" href="tel:{{ tel_number(l.contact_phone) }}" onclick="fetch('/listing/{{ l.id }}/track_click',{method:'POST'})">📞 Call</a>
         <button class="btn sec" onclick="saveFav({{ l.id }})">❤ Save</button>
         <button class="btn danger" onclick="document.getElementById('reportBox').style.display='block'">⚠ Report</button>
