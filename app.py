@@ -838,6 +838,57 @@ def admin_home():
     <div class="card"><h2>Open reports ({{ open_reports|length }})</h2><table><tr><th>Listing</th><th>Reason</th><th>Note</th><th>Action</th></tr>{% for r in open_reports %}<tr><td><a href="/listing/{{ r.listing_id }}">{{ r.title }}</a></td><td>{{ r.reason }}</td><td>{{ r.note }}</td><td><form method="post" action="/admin/report/{{ r.id }}" style="display:inline"><button class="btn sm sec" name="act" value="dismiss">Dismiss</button></form><form method="post" action="/admin/report/{{ r.id }}" style="display:inline"><button class="btn sm" name="act" value="hide">Hide</button></form><form method="post" action="/admin/report/{{ r.id }}" style="display:inline"><button class="btn sm danger" name="act" value="remove">Remove</button></form></td></tr>{% endfor %}</table></div>
     """, pending_listings=pending_listings, pending_payments=pending_payments, pending_verifs=pending_verifs, open_reports=open_reports, stats=stats)
 
+
+@app.route("/admin/users")
+@admin_required
+def admin_users():
+    search = request.args.get("q","").strip()
+    if search:
+        users = q("SELECT * FROM users WHERE full_name LIKE ? OR phone LIKE ? OR email LIKE ? ORDER BY id DESC", (f"%{search}%", f"%{search}%", f"%{search}%"))
+    else:
+        users = q("SELECT * FROM users ORDER BY id DESC LIMIT 100")
+    return render_page("""
+    <h1>All Users</h1>
+    <form method="get"><input name="q" placeholder="Search name / phone / email" value="{{ search }}">
+    <button class="btn">Search</button></form>
+    <table><tr><th>ID</th><th>Name</th><th>Phone</th><th>Role</th><th>Verified</th><th>Status</th><th>Action</th></tr>
+    {% for u in users %}
+    <tr>
+      <td>{{ u.id }}</td>
+      <td>{{ u.full_name }}</td>
+      <td>{{ u.phone }}</td>
+      <td>{{ u.role }}</td>
+      <td>{% if u.verified_badge %}✅{% else %}❌{% endif %}</td>
+      <td>{% if u.blacklisted %}🚫 BANNED{% else %}Active{% endif %}</td>
+      <td>
+        <form method="post" action="/admin/user_action" style="display:inline">
+        <input type="hidden" name="user_id" value="{{ u.id }}">
+        <button name="action" value="verify">Verify</button>
+        <button name="action" value="ban">Ban</button>
+        <button name="action" value="unban">Unban</button>
+        <button name="action" value="delete" onclick="return confirm('Delete user?')">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+    </table>
+    <p><a href="/admin">← Back to Admin</a></p>
+    """, users=users, search=search)
+
+@app.route("/admin/user_action", methods=["POST"])
+@admin_required
+def admin_user_action():
+    uid = request.form.get("user_id")
+    act = request.form.get("action")
+    if act == "verify":
+        ex("UPDATE users SET verified_badge=1, verification_status='verified' WHERE id=?", (uid,))
+    elif act == "ban":
+        ex("UPDATE users SET blacklisted=1 WHERE id=?", (uid,))
+    elif act == "unban":
+        ex("UPDATE users SET blacklisted=0 WHERE id=?", (uid,))
+    elif act == "delete":
+        ex("DELETE FROM users WHERE id=?", (uid,))
+    return redirect("/admin/users")
 @app.route("/admin/verify/<int:vid>", methods=["POST"])
 @admin_required
 def admin_verify(vid):
