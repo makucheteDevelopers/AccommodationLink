@@ -285,14 +285,25 @@ footer a{color:#d6d1c2;text-decoration:underline}footer a:hover{color:var(--gold
   <div style="background:white;max-width:520px;width:100%;max-height:85vh;overflow:auto;border-radius:16px;padding:22px">
     <h2 style="margin:0 0 6px">Welcome to Accommodation Link 🏠</h2>
     <p style="font-size:13px;color:#64748B;margin:0 0 12px">Please read and agree to continue</p>
-    <div style="font-size:13px;line-height:1.6;color:#334155;background:#F8FAFC;border-radius:10px;padding:14px;max-height:280px;overflow:auto">
-      <p><b>1. Listings:</b> Only list properties you own or are authorised to list. False listings will be removed and account banned.</p>
-      <p><b>2. Payments:</b> We do NOT handle rent. Pay landlord directly and ALWAYS view before paying.</p>
-      <p><b>3. Safety:</b> Never send money before viewing. Report scams via WhatsApp support.</p>
-      <p><b>4. Accuracy:</b> Price, suburb, rooms and photos must be accurate.</p>
-      <p><b>5. Contact:</b> By continuing you agree landlords / tenants may contact you via WhatsApp / phone about listings.</p>
-      <p><b>6. Liability:</b> Accommodation Link is a listing platform only and is not responsible for agreements between landlord and tenant.</p>
-    </div>
+    <div style="font-size:13px;line-height:1.7;color:#334155;background:#F8FAFC;border-radius:10px;padding:14px;max-height:280px;overflow:auto">
+  <p><b>1. Acceptance:</b> By using Accommodation Link you agree to these Terms. If you do not agree, do not use the site.</p>
+  <p><b>2. Who We Are:</b> Accommodation Link is a listing platform in Zimbabwe connecting landlords / agents with tenants. We do NOT own the houses listed and we are NOT a party to any rental agreement.</p>
+  <p><b>3. Accounts:</b> You must provide true name, phone number and suburb. You are responsible for your account. One account per person. Fake accounts will be banned.</p>
+  <p><b>4. Landlord / Agent Rules:</b> Only list properties you own or are authorised to list. Price, suburb, city, rooms, type, photos and availability must be true and up to date. Remove listing when taken. No fake photos, no bait pricing, no charging viewing fees through this site.</p>
+  <p><b>5. Tenant Rules:</b> Only contact landlords about listings you are genuinely interested in. No spam, no harassment, no abusive language on WhatsApp / calls. Be on time for viewings or cancel in advance.</p>
+  <p><b>6. Viewings & Payments - VERY IMPORTANT:</b> ALWAYS view the house in person before paying ANY money. Never send deposit, rent or viewing fee via EcoCash / bank before viewing. Meet at the property, check ID of landlord, ask for proof of ownership / authority. Accommodation Link does NOT handle rent, deposits or refunds.</p>
+  <p><b>7. Scams & Safety:</b> If someone asks for money before viewing, asks you to pay to a different name, or price is too good to be true - STOP and report via WhatsApp support. We will ban scammers but you must verify before paying.</p>
+  <p><b>8. Boost / Featured Listings:</b> Paid Boost / Featured only gives more visibility. It does NOT guarantee tenants and is non-refundable once activated, unless listing was removed by us in error.</p>
+  <p><b>9. Prohibited Content:</b> No porn, no drugs, no violence, no hate speech, no discrimination, no posting other people's phone numbers or photos without permission.</p>
+  <p><b>10. Privacy:</b> Your name, phone and listings are visible to other users so they can contact you about houses. We do NOT sell your data. We may use your contact to send booking / listing updates.</p>
+  <p><b>10. Privacy - Personal Info:</b> Your name, phone and listings are visible to other users so they can contact you about houses. We do NOT sell your data. We may use your contact to send booking / listing updates.</p>
+<p><b>10B. Privacy - Documents Uploaded:</b> If you upload documents for verification - e.g. National ID, passport, proof of ownership, title deed, lease agreement, or agent letter - those documents are PRIVATE and are NEVER shown to other users, tenants or landlords. Only Admin / Verification Team can see them, only to verify you are a real landlord / agent. We do NOT share, sell, post or forward your documents to anyone. Documents are stored securely and are only used for verification. You may request deletion of your documents after verification by contacting WhatsApp Support. Do NOT upload bank cards, PINs or passwords - we will never ask for them.</p>
+  <p><b>11. Removal & Termination:</b> We may remove any listing or ban any account without notice for false info, scam, abuse or breaking these Terms. No refund for Boost if banned for breaking Terms.</p>
+  <p><b>12. Liability:</b> You use the site at your own risk. We are not liable for loss, theft, damage, or disputes between landlord and tenant. Any agreement is between landlord and tenant only.</p>
+  <p><b>13. Changes:</b> We may update these Terms at any time. Continued use means you accept the new Terms.</p>
+  <p><b>14. Law:</b> These Terms are governed by the laws of Zimbabwe.</p>
+  <p><b>15. Contact:</b> For help, scams or complaints, contact us via WhatsApp Support on the site.</p>
+</div>
     <label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;margin:14px 0">
       <input type="checkbox" id="forceAgreeCheck" onchange="document.getElementById('forceAgreeBtn').disabled=!this.checked">
       <span>I have read and agree to the Terms & Conditions</span>
