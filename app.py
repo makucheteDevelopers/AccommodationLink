@@ -298,7 +298,7 @@ footer a{color:#d6d1c2;text-decoration:underline}footer a:hover{color:var(--gold
 {% endwith %}
 {% block content %}{% endblock %}
 </main>
-<footer><em>{{ get_setting('site_credit') }}</em> &nbsp;·&nbsp; <a href="/about-developer">About the developer</a></footer>
+<footer><em>{{ get_setting('site_credit') }}</em> &nbsp;&nbsp; <a href="/about-developer">About the developer</a><br><br><p style="font-size:12px; color:#d6d1c2;">DISCLAIMER: Accommodation Link is advertising only. We do NOT collect rent. VIEW Before You Pay.<br><a href="/terms">Terms & Conditions</a> | <a href="/privacy">Privacy Policy</a></p></footer>
 </body></html>
 """
 
