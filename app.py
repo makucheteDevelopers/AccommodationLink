@@ -299,9 +299,52 @@ footer a{color:#d6d1c2;text-decoration:underline}footer a:hover{color:var(--gold
 {% block content %}{% endblock %}
 </main>
 <footer><em>{{ get_setting('site_credit') }}</em> &nbsp;&nbsp; <a href="/about-developer">About the developer</a><br><br><p style="font-size:12px; color:#d6d1c2;">DISCLAIMER: Accommodation Link is advertising only. We do NOT collect rent. VIEW Before You Pay.<br><a href="/terms">Terms & Conditions</a> | <a href="/privacy">Privacy Policy</a></p></footer>
+<div id="termsPopup" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:10000; justify-content:center; align-items:center;">
+  <div style="background:white; color:#111; max-width:500px; width:90%; padding:20px; border-radius:10px;">
+    <h3 style="color:#111;">Welcome to Accommodation Link</h3>
+    <ul style="color:#111; font-size:14px;">
+      <li>We are advertising ONLY - we do NOT collect rent</li>
+      <li><b>VIEW Before You Pay</b> - Never pay before viewing</li>
+      <li>Title Deed / Licence is for verification ONLY, never shown to public</li>
+      <li>We do NOT sell your data. You can ask for deletion anytime.</li>
+    </ul>
+    <p><a href="/terms" target="_blank">Read Full Terms & Privacy</a></p>
+    <label style="color:#111;"><input type="checkbox" id="agreeTerms"> I Agree to Terms & Conditions</label><br><br>
+    <button onclick="acceptTerms()" class="btn wa" style="width:100%;">I Agree - Continue</button>
+  </div>
+</div>
+<script>
+function acceptTerms(){
+  if(!document.getElementById('agreeTerms').checked){ alert('Please tick I Agree first'); return; }
+  localStorage.setItem('acclink_terms','accepted');
+  document.getElementById('termsPopup').style.display='none';
+}
+if(!localStorage.getItem('acclink_terms')){
+  document.getElementById('termsPopup').style.display='flex';
+}
+</script>
 </body></html>
 """
+@app.route('/terms')
+def terms():
+    content = """
+    <h2>Terms & Conditions - Accommodation Link</h2>
+    <p><b>Last updated:</b> 21 Nov 2026</p>
+    <h3>1. DISCLAIMER</h3>
+    <p>Accommodation Link is advertising only. We do NOT own properties, we do NOT collect rent. Any rent agreement is between Tenant and Landlord.</p>
+    <p style="color:red; font-weight:bold;">VIEW BEFORE YOU PAY - Never send money before you have viewed the property. We are NOT liable if you pay without viewing.</p>
+    <h3>2. Verification Documents</h3>
+    <p>Title Deed / Agent Licence is for verification ONLY. It is NEVER shown to public. Tenants only see Verified Badge.</p>
+    <p>By ticking I Agree, you give consent under Cyber and Data Protection Act [Chapter 12:07] for verification only. You can ask for deletion anytime via WhatsApp, we delete within 7 days. We do NOT sell your data.</p>
+    <h3>3. Scam Reports</h3>
+    <p>Tenants can Report Scam. Reported listings are hidden while Admin investigates.</p>
+    <p><a href="/">Back to Home</a></p>
+    """
+    return render_template_string(BASE_HTML.replace("{% block content %}{% endblock %}", content))
 
+@app.route('/privacy')
+def privacy():
+    return terms()
 @app.context_processor
 def inject():
     u = current_user()
