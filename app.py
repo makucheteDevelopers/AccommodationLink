@@ -822,6 +822,29 @@ def subscription_buy():
     ref = gen_ref()
     pid = ex("INSERT INTO payments(user_id,tier_id,type,amount,currency,ref_code,status) VALUES(?,?,'subscription',?,'USD',?,'awaiting_verification')", (u["id"], t["id"], t["price_usd"], ref))
     return redirect(f"/checkout/{pid}")
+  # ===== BOOST PRICES =====
+def get_boost_prices():
+    try:
+        q("CREATE TABLE IF NOT EXISTS boost_prices (id INTEGER PRIMARY KEY, label TEXT, days INTEGER, price REAL)")
+    except: pass
+    prices = q("SELECT * FROM boost_prices ORDER BY days")
+    if not prices:
+        defaults = [("3 Days", 3, 2), ("1 Week", 7, 5), ("2 Weeks", 14, 8), ("3 Weeks", 21, 10), ("Monthly", 30, 15), ("Unlimited", 9999, 30)]
+        for label, days, price in defaults:
+            q("INSERT INTO boost_prices (label, days, price) VALUES (?,?,?)", (label, days, price), commit=True)
+        prices = q("SELECT * FROM boost_prices ORDER BY days")
+    return prices
+
+@app.route("/admin/boost-prices", methods=["POST"])
+@admin_required
+def admin_boost_prices():
+    for key in request.form:
+        if key.startswith("price_"):
+            pid = key.replace("price_", "")
+            try:
+                q("UPDATE boost_prices SET price=? WHERE id=?", (float(request.form[key]), pid), commit=True)
+            except: pass
+    return redirect("/admin")
 
 # ================= ADMIN =================
 @app.route("/admin")
@@ -835,6 +858,7 @@ def admin_home():
     all_users = q("SELECT *, (SELECT COUNT(*) FROM listings WHERE user_id=users.id) as listing_count FROM users WHERE role!='admin' ORDER BY id DESC")
     all_listings = q("SELECT l.*, u.full_name FROM listings l JOIN users u ON u.id=l.user_id ORDER BY l.id DESC LIMIT 100")
     all_payments = q("SELECT p.*, u.full_name FROM payments p JOIN users u ON u.id=p.user_id ORDER BY p.id DESC LIMIT 100")
+    boost_prices = get_boost_prices()
     return render_page("""
     <h1>Admin</h1>
     <div class="grid"><div class="card"><div class="muted">Active listings</div><h2>{{ stats.active_listings }}</h2></div><div class="card"><div class="muted">Revenue</div><h2>${{ '%.2f'|format(stats.revenue) }}</h2></div><div class="card"><div class="muted">Users</div><h2>{{ stats.users }}</h2></div></div>
@@ -867,7 +891,7 @@ def admin_home():
 {% endfor %}
 </table>
 </div>
-    """, pending_listings=pending_listings, pending_payments=pending_payments, pending_verifs=pending_verifs, open_reports=open_reports, stats=stats, all_users=all_users, all_listings=all_listings, all_payments=all_payments)
+    """, pending_listings=pending_listings, pending_payments=pending_payments, pending_verifs=pending_verifs, open_reports=open_reports, stats=stats, all_users=all_users, boost_prices=boost_prices, all_listings=all_listings, all_payments=all_payments)
 
 
 @app.route("/admin/users")
@@ -1039,6 +1063,7 @@ def ensure_featured_column():
   except Exception:
       pass
 ensure_featured_column()
+
 
 
 
