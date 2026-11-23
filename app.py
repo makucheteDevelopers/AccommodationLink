@@ -865,7 +865,7 @@ def admin_home():
 {% for p in boost_prices %}
 <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
 <label style="flex:1; font-weight:bold;">{{ p.label }} ({{ p.days }} days)</label>
-<span>R</span>
+<span>$</span>
 <input type="number" step="0.01" name="price_{{ p.id }}" value="{{ p.price }}" style="width:120px; padding:8px;">
 </div>
 {% endfor %}
@@ -1073,6 +1073,7 @@ def ensure_featured_column():
   except Exception:
       pass
 ensure_featured_column()
+
 
 
 
