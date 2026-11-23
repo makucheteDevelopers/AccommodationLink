@@ -696,8 +696,7 @@ def dashboard():
     <div class="card">
       <h2>My listings ({{ listings|length }})</h2>
       <table><tr><th>Title</th><th>Type</th><th>Price</th><th>Status</th><th>Views/Clicks</th><th>Expires</th><th></th></tr>
-      {% for l in listings %}<tr><td>{{ l.title }}</td><td>{{ l.type }}</td><td>{{ l.currency }} {{ '%.2f'|format(l.price) }}</td><td>{{ l.status }}</td><td>{{ l.views }} / {{ l.clicks }}</td><td>{{ l.expires_at or '-' }}</td><td><a href="/listing/{{ l.id }}">View</a></td></tr>{% endfor %}
-      </table>
+     {% for l in listings %}<tr><td>{{ l.title }}</td><td>{{ l.type }}</td><td>{{ l.currency }} {{ "%.2f"|format(l.price) }}</td><td>{{ l.status }}</td><td>{{ l.views or 0 }} / {{ l.clicks or 0 }}</td><td>{{ l.expires_at or '-' }}</td><td><a class="btn sec" href="/listing/{{ l.id }}/edit">Edit</a> <a class="btn sec" href="/listing/{{ l.id }}/delete" onclick="return confirm('Delete this listing?')">Delete</a></td></tr>{% endfor %}
     </div>
     """, u=u, listings=listings, sub=sub)
 
