@@ -100,7 +100,7 @@ def init_db():
           target_id INTEGER, meta TEXT, created_at TEXT DEFAULT CURRENT_TIMESTAMP);
         CREATE TABLE IF NOT EXISTS settings(key TEXT PRIMARY KEY, value TEXT);
         """)
-      if not q("SELECT 1 FROM users WHERE role='admin'", one=True):
+        if not q("SELECT 1 FROM users WHERE role='admin'", one=True):
             ex("INSERT INTO users(role,full_name,email,phone,password_hash,verification_status,verified_badge) VALUES('admin','Administrator','admin@accommodationlink.co.zw','0770000000',?,'verified',1)", (generate_password_hash("Admin@123"),))
         if not q("SELECT 1 FROM pricing_tiers", one=True):
             ex("INSERT INTO pricing_tiers(name,type,duration_days,price_usd) VALUES('Per-listing','per_listing',30,5.0)")
