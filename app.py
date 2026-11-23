@@ -100,13 +100,6 @@ def init_db():
           target_id INTEGER, meta TEXT, created_at TEXT DEFAULT CURRENT_TIMESTAMP);
         CREATE TABLE IF NOT EXISTS settings(key TEXT PRIMARY KEY, value TEXT);
         """)
-           # --- FIX 1: Add is_featured if old DB doesn't have it ---
-           try:
-               d.execute("ALTER TABLE listings ADD COLUMN is_featured INTEGER DEFAULT 0")
-               d.commit()
-           except Exception:
-               pass
-           # --- END FIX 1 ---
       if not q("SELECT 1 FROM users WHERE role='admin'", one=True):
             ex("INSERT INTO users(role,full_name,email,phone,password_hash,verification_status,verified_badge) VALUES('admin','Administrator','admin@accommodationlink.co.zw','0770000000',?,'verified',1)", (generate_password_hash("Admin@123"),))
         if not q("SELECT 1 FROM pricing_tiers", one=True):
@@ -1002,3 +995,14 @@ if __name__ == "__main__":
     print("   Admin: admin@accommodationlink.co.zw / Admin@123\n")
     port = int(os.environ.get("PORT", 5000))
     app.run(debug=False, host="0.0.0.0", port=port)
+# --- FIX 5: Safe column check ---
+def ensure_featured_column():
+  try:
+      with app.app_context():
+          d = db()
+          d.execute("ALTER TABLE products ADD COLUMN is_featured INTEGER DEFAULT 0")
+          d.commit()
+  except Exception:
+      pass
+ensure_featured_column()
+
