@@ -100,7 +100,14 @@ def init_db():
           target_id INTEGER, meta TEXT, created_at TEXT DEFAULT CURRENT_TIMESTAMP);
         CREATE TABLE IF NOT EXISTS settings(key TEXT PRIMARY KEY, value TEXT);
         """)
-        if not q("SELECT 1 FROM users WHERE role='admin'", one=True):
+             # --- FIX 1: Add is_featured if old DB doesn't have it ---
+             try:
+                 d.execute("ALTER TABLE listings ADD COLUMN is_featured INTEGER DEFAULT 0")
+                 d.commit()
+             except Exception:
+                 pass
+             # --- END FIX 1 ---
+      if not q("SELECT 1 FROM users WHERE role='admin'", one=True):
             ex("INSERT INTO users(role,full_name,email,phone,password_hash,verification_status,verified_badge) VALUES('admin','Administrator','admin@accommodationlink.co.zw','0770000000',?,'verified',1)", (generate_password_hash("Admin@123"),))
         if not q("SELECT 1 FROM pricing_tiers", one=True):
             ex("INSERT INTO pricing_tiers(name,type,duration_days,price_usd) VALUES('Per-listing','per_listing',30,5.0)")
@@ -256,6 +263,7 @@ label{display:block;margin:8px 0 4px;font-weight:600;font-size:13px;color:var(--
 .flash.err{background:#fde8e8;border-color:#f5b5b5;color:#7a1f1f}
 .badge{display:inline-block;background:var(--navy);color:var(--gold);font-size:11px;padding:3px 9px;border-radius:99px;font-weight:700;letter-spacing:.3px}
 .badge.pending{background:#fff4d6;color:#8a6200}.badge.rej{background:#fde8e8;color:#c0392b}
+.badge.featured{background:#16a34a;color:#fff}
 table{width:100%;border-collapse:collapse;font-size:14px}
 th,td{padding:8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
 th{background:#faf7ee;color:var(--navy);font-weight:700}
@@ -829,6 +837,9 @@ def admin_home():
     pending_verifs = q("SELECT v.*, u.full_name, u.role, u.email, u.phone FROM verifications v JOIN users u ON u.id=v.user_id WHERE v.status='pending' ORDER BY v.id DESC")
     open_reports = q("SELECT r.*, l.title FROM reports r JOIN listings l ON l.id=r.listing_id WHERE r.status='open' ORDER BY r.id DESC")
     stats = {"active_listings": q("SELECT COUNT(*) c FROM listings WHERE status='active'", one=True)["c"], "revenue": q("SELECT COALESCE(SUM(amount),0) s FROM payments WHERE status='verified'", one=True)["s"], "users": q("SELECT COUNT(*) c FROM users WHERE role!='admin'", one=True)["c"]}
+        all_users = q("SELECT *, (SELECT COUNT(*) FROM listings WHERE user_id=users.id) as listing_count FROM users WHERE role!='admin' ORDER BY id DESC")
+    all_listings = q("SELECT l.*, u.full_name FROM listings l JOIN users u ON u.id=l.user_id ORDER BY l.id DESC LIMIT 100")
+    all_payments = q("SELECT p.*, u.full_name FROM payments p JOIN users u ON u.id=p.user_id ORDER BY p.id DESC LIMIT 100")
     return render_page("""
     <h1>Admin</h1>
     <div class="grid"><div class="card"><div class="muted">Active listings</div><h2>{{ stats.active_listings }}</h2></div><div class="card"><div class="muted">Revenue</div><h2>${{ '%.2f'|format(stats.revenue) }}</h2></div><div class="card"><div class="muted">Users</div><h2>{{ stats.users }}</h2></div></div>
@@ -836,7 +847,10 @@ def admin_home():
     <div class="card"><h2>Pending payments ({{ pending_payments|length }})</h2><table><tr><th>Ref</th><th>User</th><th>Type</th><th>Amount</th><th>Proof</th><th>Action</th></tr>{% for p in pending_payments %}<tr><td>{{ p.ref_code }}</td><td>{{ p.full_name }}</td><td>{{ p.type }}</td><td>${{ '%.2f'|format(p.amount) }}</td><td>{% if p.proof_url %}<a target="_blank" href="/uploads/{{ p.proof_url }}">view</a>{% endif %}{% if p.txn_id %}<br><span class="muted">{{ p.txn_id }}</span>{% endif %}</td><td><form method="post" action="/admin/payment/{{ p.id }}" style="display:inline"><button class="btn sm" name="act" value="approve">Verify</button></form><form method="post" action="/admin/payment/{{ p.id }}" style="display:inline"><input name="reason" placeholder="reason" style="width:90px;display:inline"><button class="btn sm danger" name="act" value="reject">Reject</button></form></td></tr>{% endfor %}</table></div>
     <div class="card"><h2>Pending listings ({{ pending_listings|length }})</h2><table><tr><th>Title</th><th>Agent</th><th>Type</th><th>Preview</th><th>Action</th></tr>{% for l in pending_listings %}<tr><td>{{ l.title }}<br><span class="muted">{{ l.suburb }}, {{ l.city }} — {{ l.currency }} {{ '%.2f'|format(l.price) }}</span></td><td>{{ l.full_name }}</td><td>{{ l.type }}</td><td><a target="_blank" href="/listing/{{ l.id }}">Open</a></td><td><form method="post" action="/admin/listing/{{ l.id }}" style="display:inline"><button class="btn sm" name="act" value="approve">Approve</button></form><form method="post" action="/admin/listing/{{ l.id }}" style="display:inline"><input name="reason" placeholder="reason" style="width:90px;display:inline"><button class="btn sm danger" name="act" value="reject">Reject</button></form></td></tr>{% endfor %}</table></div>
     <div class="card"><h2>Open reports ({{ open_reports|length }})</h2><table><tr><th>Listing</th><th>Reason</th><th>Note</th><th>Action</th></tr>{% for r in open_reports %}<tr><td><a href="/listing/{{ r.listing_id }}">{{ r.title }}</a></td><td>{{ r.reason }}</td><td>{{ r.note }}</td><td><form method="post" action="/admin/report/{{ r.id }}" style="display:inline"><button class="btn sm sec" name="act" value="dismiss">Dismiss</button></form><form method="post" action="/admin/report/{{ r.id }}" style="display:inline"><button class="btn sm" name="act" value="hide">Hide</button></form><form method="post" action="/admin/report/{{ r.id }}" style="display:inline"><button class="btn sm danger" name="act" value="remove">Remove</button></form></td></tr>{% endfor %}</table></div>
-    """, pending_listings=pending_listings, pending_payments=pending_payments, pending_verifs=pending_verifs, open_reports=open_reports, stats=stats)
+        <div class="card"><h2>Manage Users ({{ all_users|length }})</h2><table><tr><th>Name</th><th>Phone / Email</th><th>Listings</th><th>Status</th><th>Action</th></tr>{% for u in all_users %}<tr><td>{{ u.full_name }}<br><span class="muted">{{ u.role }}</span></td><td>{{ u.phone }}<br><span class="muted">{{ u.email }}</span></td><td>{{ u.listing_count }}</td><td>{% if u.blacklisted %}<span class="badge rej">BLOCKED</span>{% else %}<span class="badge featured">Active</span>{% endif %}</td><td><form method="post" action="/admin/user_toggle/{{ u.id }}" style="display:inline"><button class="btn sm {% if u.blacklisted %}sec{% else %}danger{% endif %}">{% if u.blacklisted %}Unblock{% else %}Block{% endif %}</button></form> <form method="post" action="/admin/user_delete/{{ u.id }}" style="display:inline" onsubmit="return confirm('Delete user + all listings?')"><button class="btn sm danger">Delete</button></form></td></tr>{% endfor %}</table></div>
+    <div class="card"><h2>Manage Listings ({{ all_listings|length }})</h2><table><tr><th>Title</th><th>Agent</th><th>Price</th><th>Status</th><th>Action</th></tr>{% for l in all_listings %}<tr><td>{{ l.title }}<br><span class="muted">{{ l.suburb }}, {{ l.city }}</span> {% if l.is_featured %}<span class="badge featured">★ FEATURED</span>{% endif %}</td><td>{{ l.full_name }}</td><td>{{ l.currency }} {{ '%.2f'|format(l.price) }}</td><td>{{ l.status }}</td><td><form method="post" action="/admin/listing_feature/{{ l.id }}" style="display:inline"><button class="btn sm">{% if l.is_featured %}Unfeature{% else %}Make Featured{% endif %}</button></form> <form method="post" action="/admin/listing_delete/{{ l.id }}" style="display:inline" onsubmit="return confirm('Delete listing?')"><button class="btn sm danger">Delete</button></form></td></tr>{% endfor %}</table></div>
+    <div class="card"><h2>Transaction History</h2><table><tr><th>Date</th><th>User</th><th>Type</th><th>Amount</th><th>Ref / Txn</th><th>Status</th></tr>{% for p in all_payments %}<tr><td>{{ p.created_at }}</td><td>{{ p.full_name }}</td><td>{{ p.type }}</td><td><b>${{ '%.2f'|format(p.amount) }}</b></td><td>{{ p.ref_code }}{% if p.txn_id %}<br><span class="muted">{{ p.txn_id }}</span>{% endif %}</td><td>{{ p.status }}</td></tr>{% endfor %}</table></div>
+    """, pending_listings=pending_listings, pending_payments=pending_payments, pending_verifs=pending_verifs, open_reports=open_reports, stats=stats, all_users=all_users, all_listings=all_listings, all_payments=all_payments)
 
 
 @app.route("/admin/users")
