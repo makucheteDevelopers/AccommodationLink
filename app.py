@@ -845,6 +845,28 @@ def admin_home():
         <div class="card"><h2>Manage Users ({{ all_users|length }})</h2><table><tr><th>Name</th><th>Phone / Email</th><th>Listings</th><th>Status</th><th>Action</th></tr>{% for u in all_users %}<tr><td>{{ u.full_name }}<br><span class="muted">{{ u.role }}</span></td><td>{{ u.phone }}<br><span class="muted">{{ u.email }}</span></td><td>{{ u.listing_count }}</td><td>{% if u.blacklisted %}<span class="badge rej">BLOCKED</span>{% else %}<span class="badge featured">Active</span>{% endif %}</td><td><form method="post" action="/admin/user_toggle/{{ u.id }}" style="display:inline"><button class="btn sm {% if u.blacklisted %}sec{% else %}danger{% endif %}">{% if u.blacklisted %}Unblock{% else %}Block{% endif %}</button></form> <form method="post" action="/admin/user_delete/{{ u.id }}" style="display:inline" onsubmit="return confirm('Delete user + all listings?')"><button class="btn sm danger">Delete</button></form></td></tr>{% endfor %}</table></div>
     <div class="card"><h2>Manage Listings ({{ all_listings|length }})</h2><table><tr><th>Title</th><th>Agent</th><th>Price</th><th>Status</th><th>Action</th></tr>{% for l in all_listings %}<tr><td>{{ l.title }}<br><span class="muted">{{ l.suburb }}, {{ l.city }}</span> {% if l.is_featured %}<span class="badge featured">★ FEATURED</span>{% endif %}</td><td>{{ l.full_name }}</td><td>{{ l.currency }} {{ '%.2f'|format(l.price) }}</td><td>{{ l.status }}</td><td><form method="post" action="/admin/listing_feature/{{ l.id }}" style="display:inline"><button class="btn sm">{% if l.is_featured %}Unfeature{% else %}Make Featured{% endif %}</button></form> <form method="post" action="/admin/listing_delete/{{ l.id }}" style="display:inline" onsubmit="return confirm('Delete listing?')"><button class="btn sm danger">Delete</button></form></td></tr>{% endfor %}</table></div>
     <div class="card"><h2>Transaction History</h2><table><tr><th>Date</th><th>User</th><th>Type</th><th>Amount</th><th>Ref / Txn</th><th>Status</th></tr>{% for p in all_payments %}<tr><td>{{ p.created_at }}</td><td>{{ p.full_name }}</td><td>{{ p.type }}</td><td><b>${{ '%.2f'|format(p.amount) }}</b></td><td>{{ p.ref_code }}{% if p.txn_id %}<br><span class="muted">{{ p.txn_id }}</span>{% endif %}</td><td>{{ p.status }}</td></tr>{% endfor %}</table></div>
+    <div class="card">
+<h2>Users</h2>
+<table>
+<tr><th>Name</th><th>Email</th><th>Status</th><th>Action</th></tr>
+{% for u in all_users %}
+<tr>
+<td>{{u['full_name']}}<br><small>{{u['phone']}}</small></td>
+<td>{{u['email']}}</td>
+<td>{% if u['blacklisted'] %}Blocked{% else %}Active{% endif %}</td>
+<td>
+<form method="POST" action="/admin/user/{{u['id']}}">
+{% if u['blacklisted'] %}
+<button name="act" value="unblock">Unblock</button>
+{% else %}
+<button name="act" value="block">Block</button>
+{% endif %}
+</form>
+</td>
+</tr>
+{% endfor %}
+</table>
+</div>
     """, pending_listings=pending_listings, pending_payments=pending_payments, pending_verifs=pending_verifs, open_reports=open_reports, stats=stats, all_users=all_users, all_listings=all_listings, all_payments=all_payments)
 
 
@@ -932,6 +954,16 @@ def admin_listing(lid):
     if request.form.get("act") == "approve": ex("UPDATE listings SET status='active' WHERE id=?", (lid,)); flash("Live.")
     else: ex("UPDATE listings SET status='rejected' WHERE id=?", (lid,)); flash("Rejected.")
     return redirect("/admin")
+@app.route("/admin/user/<int:uid>", methods=["POST"])
+@admin_required
+def admin_user(uid):
+    if request.form.get("act") == "block":
+        ex("UPDATE users SET blacklisted=1 WHERE id=?", (uid,))
+        flash("User blocked.")
+    else:
+        ex("UPDATE users SET blacklisted=0 WHERE id=?", (uid,))
+        flash("User unblocked.")
+    return redirect("/admin")
 
 @app.route("/admin/report/<int:rid>", methods=["POST"])
 @admin_required
@@ -1007,5 +1039,6 @@ def ensure_featured_column():
   except Exception:
       pass
 ensure_featured_column()
+
 
 
