@@ -106,7 +106,7 @@ def init_db():
             ex("INSERT INTO pricing_tiers(name,type,duration_days,price_usd) VALUES('Per-listing','per_listing',30,5.0)")
             ex("INSERT INTO pricing_tiers(name,type,duration_days,listing_limit,price_usd) VALUES('Monthly Unlimited','subscription',30,50,20.0)")
         defaults = {
-            "ecocash_number": "0771234567", "ecocash_receiver_name": "Tendai Moyo",
+            "ecocash_number": "0777037403", "ecocash_receiver_name": "Tinotenda Tarsh Makuchete",
             "whatsapp_support_number": "263771234567", "whatsapp_support_display_name": "Accommodation Link Support",
             "site_email": "info@accommodationlink.co.zw", "default_currency": "USD",
             "watermark_text": "Accommodation Link", "site_credit": "Powered by Tinotenda Tarsh Makuchete",
