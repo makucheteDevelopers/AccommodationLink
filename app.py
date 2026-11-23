@@ -831,7 +831,7 @@ def get_boost_prices():
     if not prices:
         defaults = [("3 Days", 3, 2), ("1 Week", 7, 5), ("2 Weeks", 14, 8), ("3 Weeks", 21, 10), ("Monthly", 30, 15), ("Unlimited", 9999, 30)]
         for label, days, price in defaults:
-            q("INSERT INTO boost_prices (label, days, price) VALUES (?,?,?)", (label, days, price), commit=True)
+            q("INSERT INTO boost_prices (label, days, price) VALUES (?,?,?)", (label, days, price))
         prices = q("SELECT * FROM boost_prices ORDER BY days")
     return prices
 
@@ -842,7 +842,7 @@ def admin_boost_prices():
         if key.startswith("price_"):
             pid = key.replace("price_", "")
             try:
-                q("UPDATE boost_prices SET price=? WHERE id=?", (float(request.form[key]), pid), commit=True)
+                q("UPDATE boost_prices SET price=? WHERE id=?", (float(request.form[key]), pid))
             except: pass
     return redirect("/admin")
 
@@ -1063,6 +1063,7 @@ def ensure_featured_column():
   except Exception:
       pass
 ensure_featured_column()
+
 
 
 
