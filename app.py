@@ -861,6 +861,16 @@ def admin_home():
     boost_prices = get_boost_prices()
     return render_page("""
     <h1>Admin</h1>
+    <div class="card"><h2>💰 Manage Boost Prices</h2><p class="muted">Change what landlords pay for boosting. Changes apply immediately.</p><form action="/admin/boost-prices" method="POST">
+{% for p in boost_prices %}
+<div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+<label style="flex:1; font-weight:bold;">{{ p.label }} ({{ p.days }} days)</label>
+<span>R</span>
+<input type="number" step="0.01" name="price_{{ p.id }}" value="{{ p.price }}" style="width:120px; padding:8px;">
+</div>
+{% endfor %}
+<button class="btn primary" type="submit" style="width:100%; margin-top:10px;">Save Changes</button>
+</form></div>
     <div class="grid"><div class="card"><div class="muted">Active listings</div><h2>{{ stats.active_listings }}</h2></div><div class="card"><div class="muted">Revenue</div><h2>${{ '%.2f'|format(stats.revenue) }}</h2></div><div class="card"><div class="muted">Users</div><h2>{{ stats.users }}</h2></div></div>
     <div class="card"><h2>Pending verifications ({{ pending_verifs|length }})</h2><table><tr><th>User</th><th>Role</th><th>Docs</th><th>Action</th></tr>{% for v in pending_verifs %}<tr><td>{{ v.full_name }}<br><span class="muted">{{ v.email }} · {{ v.phone }}</span></td><td>{{ v.role }}</td><td>{% if v.id_doc_url %}<a target="_blank" href="/uploads/{{ v.id_doc_url }}">ID</a>{% endif %}{% if v.title_deed_url %} · <a target="_blank" href="/uploads/{{ v.title_deed_url }}">Deed</a>{% endif %}{% if v.agent_license_url %} · <a target="_blank" href="/uploads/{{ v.agent_license_url }}">License</a>{% endif %}</td><td><form method="post" action="/admin/verify/{{ v.id }}" style="display:inline"><button class="btn sm" name="act" value="approve">Approve</button></form><form method="post" action="/admin/verify/{{ v.id }}" style="display:inline"><input name="reason" placeholder="reason" style="width:90px;display:inline"><button class="btn sm danger" name="act" value="reject">Reject</button></form></td></tr>{% endfor %}</table></div>
     <div class="card"><h2>Pending payments ({{ pending_payments|length }})</h2><table><tr><th>Ref</th><th>User</th><th>Type</th><th>Amount</th><th>Proof</th><th>Action</th></tr>{% for p in pending_payments %}<tr><td>{{ p.ref_code }}</td><td>{{ p.full_name }}</td><td>{{ p.type }}</td><td>${{ '%.2f'|format(p.amount) }}</td><td>{% if p.proof_url %}<a target="_blank" href="/uploads/{{ p.proof_url }}">view</a>{% endif %}{% if p.txn_id %}<br><span class="muted">{{ p.txn_id }}</span>{% endif %}</td><td><form method="post" action="/admin/payment/{{ p.id }}" style="display:inline"><button class="btn sm" name="act" value="approve">Verify</button></form><form method="post" action="/admin/payment/{{ p.id }}" style="display:inline"><input name="reason" placeholder="reason" style="width:90px;display:inline"><button class="btn sm danger" name="act" value="reject">Reject</button></form></td></tr>{% endfor %}</table></div>
@@ -1063,6 +1073,7 @@ def ensure_featured_column():
   except Exception:
       pass
 ensure_featured_column()
+
 
 
 
