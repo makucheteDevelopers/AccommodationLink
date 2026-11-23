@@ -125,6 +125,14 @@ def get_setting(key, default=""):
 def set_setting(key, value):
     ex("INSERT INTO settings(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value", (key, value))
 
+def expire_old_boosts():
+    try:
+        from datetime import datetime
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # Auto-expire any active listing where expires_at has passed
+        ex("UPDATE listings SET status = 'expired' WHERE expires_at IS NOT NULL AND expires_at != '' AND expires_at < ? AND status NOT IN ('expired', 'draft')", (now,))
+    except Exception as e:
+        print("Expire error:", e)
 def current_user():
     uid = session.get("uid")
     return q("SELECT * FROM users WHERE id=?", (uid,), one=True) if uid else None
@@ -406,6 +414,7 @@ def render_page(html, **kwargs):
 # ================= PUBLIC =================
 @app.route("/")
 def home():
+    expire_old_boosts()
     a = request.args
     sql = """SELECT l.*, u.verified_badge FROM listings l JOIN users u ON u.id=l.user_id WHERE l.status='active' AND u.blacklisted=0"""
     args = []
@@ -1073,6 +1082,7 @@ def ensure_featured_column():
   except Exception:
       pass
 ensure_featured_column()
+
 
 
 
