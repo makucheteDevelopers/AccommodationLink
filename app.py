@@ -830,7 +830,7 @@ def admin_home():
     pending_verifs = q("SELECT v.*, u.full_name, u.role, u.email, u.phone FROM verifications v JOIN users u ON u.id=v.user_id WHERE v.status='pending' ORDER BY v.id DESC")
     open_reports = q("SELECT r.*, l.title FROM reports r JOIN listings l ON l.id=r.listing_id WHERE r.status='open' ORDER BY r.id DESC")
     stats = {"active_listings": q("SELECT COUNT(*) c FROM listings WHERE status='active'", one=True)["c"], "revenue": q("SELECT COALESCE(SUM(amount),0) s FROM payments WHERE status='verified'", one=True)["s"], "users": q("SELECT COUNT(*) c FROM users WHERE role!='admin'", one=True)["c"]}
-        all_users = q("SELECT *, (SELECT COUNT(*) FROM listings WHERE user_id=users.id) as listing_count FROM users WHERE role!='admin' ORDER BY id DESC")
+    all_users = q("SELECT *, (SELECT COUNT(*) FROM listings WHERE user_id=users.id) as listing_count FROM users WHERE role!='admin' ORDER BY id DESC")
     all_listings = q("SELECT l.*, u.full_name FROM listings l JOIN users u ON u.id=l.user_id ORDER BY l.id DESC LIMIT 100")
     all_payments = q("SELECT p.*, u.full_name FROM payments p JOIN users u ON u.id=p.user_id ORDER BY p.id DESC LIMIT 100")
     return render_page("""
