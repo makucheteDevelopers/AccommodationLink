@@ -461,7 +461,10 @@ def photo_of(lid):
 @app.route("/listing/<int:lid>")
 def listing_detail(lid):
     l = q("SELECT l.*, u.verified_badge, u.full_name AS agent_name, u.role AS agent_role, u.id AS aid FROM listings l JOIN users u ON u.id=l.user_id WHERE l.id=?", (lid,), one=True)
-    if not l or l["status"] not in ("active", "expired"): abort(404)
+    u = current_user()
+    if not l: abort(404)
+    if l["status"] not in ("active", "expired") and not (u and u["role"] == "admin"):
+        abort(404)
     photos = q("SELECT * FROM listing_photos WHERE listing_id=? ORDER BY sort_order", (lid,))
     ex("UPDATE listings SET views=views+1 WHERE id=?", (lid,))
     return render_page("""
@@ -1004,4 +1007,5 @@ def ensure_featured_column():
   except Exception:
       pass
 ensure_featured_column()
+
 
